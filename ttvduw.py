@@ -120,8 +120,13 @@ class DataFeeder():
 
     def _DataGen(self):
         if self.ftype == 'xlsx':
+            # 将表格中的行转换成python list
             for r in self._ws_rows:   # 余下的是每个记录具体的值
-                this_row = [ x.value for x in r]
+                ## 争议：空单元格应该直接返回None（默认行为）还是改写为""（空字符串）
+                # 返回None时，如果模板中没有任何条件判断，就会印出"None"这四个字母
+                # 返回""时，会让模板中对应位置什么有没有
+                # this_row = [ x.value for x in r]
+                this_row = [ x.value if x.value is not None else "" for x in r]
                 this_row = this_row[self.min_col-1:]  # discarding unwanted colums
                 yield this_row
         else:
