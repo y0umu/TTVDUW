@@ -52,17 +52,12 @@ class DocuPrinter():
         if keys is None:
             use_fallback_filename = True
         else:
-            num_keys = len(keys)
-            for i, k in enumerate(keys):  # i 用来数现在是第几个k
+            for k in keys:
                 _s = self.context.get(k)
-                if _s is None:
-                    # 用户输入了非法的键，跳过
-                    num_keys -= 1  # 有效key变少了
+                if _s is None:   # 用户输入了非法的键，跳过
                     continue
                 out_name += str(_s)
-                if i < num_keys - 1:
-                    # 只有两个字段之间才需要下划线
-                    out_name += '_'
+                out_name += '_'
             if len(out_name) == 0: # 用户输入的全是非法键
                 use_fallback_filename = True
         
