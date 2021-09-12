@@ -96,10 +96,13 @@ class DataFeeder():
     def __enter__(self):
         return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, *exc_args):
+        '''
+        exc_args: tuple of (exc_type, exc_val, exc_tb)
+        '''
         if self.ftype == 'xlsx':
             self.wb_xlsx.close()
-            # print('debug: DataFeeder cleanned')
+            print('debug: DataFeeder cleanned')
 
     def context_feed(self):
         '''

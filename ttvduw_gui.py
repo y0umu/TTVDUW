@@ -1,7 +1,6 @@
 '''
 Graphical user interface for ttvduw
 '''
-from os import close
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -51,12 +50,21 @@ class TtvduwGui(tk.Tk):
         self.txt_tab_start_from_col = tk.StringVar()
         self.txt_tab_start_from_col.set('1')
 
+        # DocuPrinter实例
+        self.docu_printer = None
+        # DataFeeder实例
+        self.data_feeder = None
+
         # 绘制图形界面
         self.create_widgets()
 
         # 初始使能：开始生成、自定义输出文件名 按钮禁用
         self.btn_generate.state(['disabled'])
         self.btn_custom_outname.state(['disabled'])
+
+        # 按下[x]按钮退出时清理
+        # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
+        self.protocol('WM_DELETE_WINDOW', self._on_exit)
 
     def create_widgets(self):
         # 模板选择
@@ -186,31 +194,16 @@ class TtvduwGui(tk.Tk):
             self.txt_outdir.set(outdir)
     
     def btn_generate_callback(self):
-        tpl_name = self.txt_tpl.get()
-        df_name = self.txt_df.get()
-        outdir = self.txt_outdir.get()
-        row_start = int(self.txt_tab_start_from_row.get())
-        col_start = int(self.txt_tab_start_from_col.get())
-
         try:
             self.txt_generate.set('处理中...')
             self._disable_all_buttons()
-            the_doc = DocuPrinter(tpl_name, out_path=outdir)
-            with DataFeeder(df_name,
-                            tab_start_from_row=row_start,
-                            tab_start_from_col=col_start,
-                        ) as df:
-                for c in df.context_feed():
-                    the_doc.set_context(c)
-                    the_doc.write()
+            the_doc = self._build_docu_printer()  # 设置self.docu_printer
+            df = self._build_data_feeder()   # 设置self.data_feeder
+            for c in df.context_feed():
+                the_doc.set_context(c)
+                the_doc.write()
             print('Generation of your very documents are done.')
             msgbox.showinfo(title='提示', message='处理完了')
-        except PackageNotFoundError as e_docx:
-            print(f'Err: {e_docx.args[0]}. Did you specify the template path correctly?')
-            msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
-        except InvalidFileException as e_xlsx:
-            print(f'Err: {e_xlsx.args[0]}. Did you specify the xlsx file correctly?')
-            msgbox.showerror(title='xlsx文件问题', message='是否正确选取了作为键值表的xlsx文件？')
         except:
             msgbox.showwarning(title='警告', message='遇到了未测试过的问题，详情请查看控制台')
             raise
@@ -221,6 +214,56 @@ class TtvduwGui(tk.Tk):
             # 复位“生成”按钮的标识
             self.txt_generate.set('生成我需要的文档！')
 
+    def _build_data_feeder(self):
+        '''
+        "lazy"生成DataFeeder实例，并设置self.data_feeder
+
+        return:
+        self.data_feeder
+        '''
+        if self.data_feeder is None:
+            if self.is_df_ready:
+                df_name = self.txt_df.get()
+                row_start = int(self.txt_tab_start_from_row.get())
+                col_start = int(self.txt_tab_start_from_col.get())
+                try:
+                    self.data_feeder = DataFeeder(
+                        df_name,
+                        tab_start_from_row=row_start,
+                        tab_start_from_col=col_start
+                    )
+                except InvalidFileException as e_xlsx:
+                    print(f'Err: {e_xlsx.args[0]}. Did you specify the xlsx file correctly?')
+                    msgbox.showerror(title='xlsx文件问题', message='是否正确选取了作为键值表的xlsx文件？')
+            else:  # self.is_df_ready == False
+                print('Data feeder path not specified. Specify it first!')
+                msgbox.showinfo(title='提示', message='你应该先选择键值数据表文件')
+        else:  # self.data_feeder is not None
+            pass
+        return self.data_feeder
+    
+    def _build_docu_printer(self):
+        '''
+        "lazy"生成DocuPrinter的实例，并设置self.docu_printer
+
+        return:
+        self.docu_printer
+        '''
+        if self.docu_printer is None:
+            if self.is_tpl_ready:
+                tpl_name = self.txt_tpl.get()
+                outdir = self.txt_outdir.get()
+                try:
+                    self.docu_printer = DocuPrinter(tpl_name, out_path=outdir)
+                except PackageNotFoundError as e_docx:
+                    print(f'Err: {e_docx.args[0]}. Did you specify the template path correctly?')
+                    msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
+            else:  # self.is_tpl_ready ==False
+                print('Template path not specified. Specify it first!')
+                msgbox.showinfo(title='提示', message='你应该先选择模板文件')
+        else:  # self.docu_printer is not None
+            pass
+        return self.docu_printer
     
     def _enable_all_buttons(self):
         self.btn_filepick_tpl.state(['!disabled'])
@@ -269,6 +312,14 @@ class TtvduwGui(tk.Tk):
             self.txt_tab_start_from_row.set('1')
             msgbox.showerror(title='？？？', message='你应该输入不小于1的整数')
             return
-        
+
+    def _on_exit(self):
+        '''
+        当用户按下[x]按钮后的清理工作
+        '''
+        print('Cleaning before exit...')
+        if self.data_feeder is not None:
+            self.data_feeder.__exit__()
+        self.destroy()
 
 
