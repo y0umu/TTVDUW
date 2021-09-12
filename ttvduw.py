@@ -86,7 +86,7 @@ class DataFeeder():
         self.min_row = tab_start_from_row
         self.min_col = tab_start_from_col
         self.keys = None     # 存储读取到的表格区键名，self._load_with_xlsx将正确设置此变量
-        self.data_gen = None # 存储键值的生成器，self._DataGen将正确设置此变量
+        # self.data_gen = None # 存储键值的生成器，self._DataGen将正确设置此变量
         self.wb_xlsx = None  # 存储xlsx类型, ftype == 'xlsx'时使用
         if ftype == 'xlsx':
             self.wb_xlsx = self._load_with_xlsx()
@@ -109,15 +109,17 @@ class DataFeeder():
         这是一个生成器，喂给DocxTemplate.get_context()
         '''
         context = {}
-        for data in self.data_gen:
+        data_gen = self._DataGen()
+        for data in data_gen:
             for k,v in zip(self.keys, data):
                 context[k] = v
             yield context
 
     def _DataGen(self):
         if self.ftype == 'xlsx':
+            keys_row, data_rows = self._get_ws_key_data_rows()
             # 将表格中的行转换成python list
-            for r in self._ws_rows:   # 余下的是每个记录具体的值
+            for r in data_rows:   # 余下的是每个记录具体的值
                 ## 争议：空单元格应该直接返回None（默认行为）还是改写为""（空字符串）
                 # 返回None时，如果模板中没有任何条件判断，就会印出"None"这四个字母
                 # 返回""时，会让模板中对应位置什么有没有
@@ -127,21 +129,44 @@ class DataFeeder():
                 yield this_row
         else:
             raise NotImplementedError("Support of file type {} is not yet implemented".format(ftype))
+    
+    def _get_ws_key_data_rows(self):
+        '''
+        获取xlsx工作表中的键行，以及数据行生成器
         
+        return:
+        keys_row, ws_data_rows
+        '''
+        if self.ftype == 'xlsx':
+            wb = self.wb_xlsx
+            ws = wb.active
+            ws_data_rows = ws.iter_rows()
+            # discarding the unwanted rows
+            if self.min_row > 1:
+                for _i in range(self.min_row - 1):
+                    next(ws_data_rows)
+            keys_row = next(ws_data_rows)  # 认为表格区的第1行是键名（字段名）
+            return keys_row, ws_data_rows
+        else:
+            raise UserWarning('You should not call this method if not using xlsx')
+
     def _load_with_xlsx(self):
         wb = load_workbook(self.fname, read_only=True, data_only=True)
-        ws = wb.active
-        ws_rows = ws.iter_rows()
-        # discarding the unwanted rows
-        if self.min_row > 1:
-            for _i in range(self.min_row - 1):
-                next(ws_rows)
-        keys_row = next(ws_rows)  # 认为表格区的第1行是键名（字段名）
-        self._ws_rows = ws_rows
+        self.wb_xlsx = wb
+        keys_row, data_row = self._get_ws_key_data_rows()
 
         keys = [ str(x.value) for x in keys_row ]  # 转换成 python list
+        ## 暂时不能跳过空单元格的原因是：
+        ## self.context_feed 里面用了zip将keys与每一行一一对应
+        ## 跳过keys那一行的空单元格（“空”键）会导致非空单元格（非“空”键）与其值不能对应上
+        ## （“空”键与值的对应无论如何都是错的）
+        # keys = []
+        # for x in keys_row:
+        #     if x.value is None:  # 跳过空单元格
+        #         continue
+        #     keys.append(str(x.value))
         self.keys = keys
-        self.data_gen = self._DataGen()
+        # self.data_gen = self._DataGen()
         
         return wb
     

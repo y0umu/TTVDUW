@@ -9,27 +9,30 @@
 
 ——问题是我想要批量生成的东西，系统里生成不了啊！！！例如什么成绩排名证明，还有什么在读证明，以及学生毕业设计的封面贴纸……
 
-网上好像没有现成的个人用户app可以达成“根据模板填空”这样的目的。好在已经有能达成类似目的的[库](https://docxtpl.readthedocs.io/en/latest)了，自己写一个难度没那么大了。
+网上好像没有现成的个人用户app可以达成“根据模板填空”这样的目的。好在已经有能达成类似目的的[库](https://docxtpl.readthedocs.io/en/latest)了，自己写一个难度没那么大了。 ~~ 这就是给python-docx=template写的一个图形用户界面 ~~
 
 ## 配置使用环境
 ```shell
 pip install -r requirements.txt
 ```
-我的Python版本是3.8。
+我的Python版本是3.8。不过Python 3.9、3.10应该也能使用
 
 ## 基本用法
-这个app的入口是`app_main.py`。
+这个app的入口是`app_main.py`。有图形用户界面和命令行两种接口。
 
+无论使用图形界面还是命令行，都需要准备模板和键值数据表
 - 用户配置模板（docx格式），在模板中设置占位符1、占位符2…… 占位符的语法是所谓的[Jinja语法](https://jinja.palletsprojects.com/en/3.0.x/templates/)，占位符两侧要用`{{  }}`包裹起来。观看examples目录中的示例文件就能大致明白该怎么书写
 - 用户提供键值数据表（xlsx等），每一列为占位符1、占位符2……以及它们对应的值
 
+### 图形用户界面
+![gui](screenshots/ttvduw_gui.png)
 
-通过一个例子描述会更为清楚：
-```shell
-python app_main.py -t "examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx" -f "examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx" --tab-start-from-row 2 --custom-out-names-with-keys stu_id stu_name
-```
+图形用户界面展现了所有的可配置项。
 
-命令行帮助：
+需要解释的可能是“选择输出文件名”（`ttvduw_gui.TtvduwGui.btn_custom_outname`）这个按钮。默认情况下，图形界面程序的输出文件名由键值数据表中的全部字段的值组成。如果你希望输出文件名只包括部分字段的值，就可点击这个按钮。点击此按钮后会弹出图中右侧的窗口，将输出文件命名时希望保留的字段保持勾选，其余取消勾选即可生效。
+
+
+### 命令行
 ```
 usage: app_main.py [-h] -t TEMPLATE -f DATA_FEEDER_FILE [-o OUT_PATH] [--tab-start-from-row TAB_START_FROM_ROW]
                  [--tab-start-from-col TAB_START_FROM_COL]
@@ -51,6 +54,12 @@ optional arguments:
                         使用哪些键的值作为输出文件名
 ```
 
+通过一个例子描述会更为清楚：
+```shell
+python app_main.py -t "examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx" -f "examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx" --tab-start-from-row 2 --custom-out-names-with-keys stu_id stu_name
+```
+
+
 ## 其他文件的说明
 `ttvduw.py`: 底层实现
 `ttvduw_gui.py`: 图形用户界面代码
@@ -58,7 +67,7 @@ optional arguments:
 
 ## 功能完善路线图
 目前app只有命令行界面，这对广大不熟悉命令行的职员们来说简直就是灾难。考虑实现
-- [ ] 一个简单的图形用户界面
+- [x] 一个简单的图形用户界面（使用Python自带的tkinter包）
 
 让职员们去配置Python环境也是对大家的折磨。考虑使用[PyInstaller](https://www.pyinstaller.org/)
 - [ ] 打包

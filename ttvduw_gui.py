@@ -23,12 +23,11 @@ class TtvduwGui(tk.Tk):
         super().__init__()
         self.geometry('300x400')
         self.title('这就是你想要的文档')
-
         self.gui_help = '''1. 选择模板的路径
 2. 选择键值数据表（xlsx文件）的路径
 3. 选择输出文件夹 [非必选]
 4. 配置输出文件名 [非必选]
-5. 点击"生成我需要的文件！"按钮'''
+5. 点击"生成我需要的文档！"按钮'''
 
         self.txt_tpl = tk.StringVar()  # 所选择模板的路径
         self.txt_df = tk.StringVar()   # 所选择键值数据表DataFeeder文件（xlsx等）文件的路径
@@ -54,7 +53,11 @@ class TtvduwGui(tk.Tk):
         self.docu_printer = None
         # DataFeeder实例
         self.data_feeder = None
-
+        # 设置输出文件名的组成
+        # 由custom_outname_window或filepick_callback设置此值：
+        self.custom_out_names_with_keys = []
+        self._keys_mask = None
+        
         # 绘制图形界面
         self.create_widgets()
 
@@ -88,37 +91,37 @@ class TtvduwGui(tk.Tk):
         self.lf_pick_df = ttk.LabelFrame(self, text='键值数据表')
         # self.lf_pick_df.grid(column=0, row=1)
         self.lf_pick_df.pack(fill='x', pady=5)
+        ## 数据区域指定
+        ### 行
+        self.label_tab_start_from_row = ttk.Label(self.lf_pick_df, text='从表格第?行开始取数据')
+        self.label_tab_start_from_row.grid(column=0, row=0)
+        self.textbox_tab_start_from_row = ttk.Entry(
+            self.lf_pick_df,
+            textvariable=self.txt_tab_start_from_row
+        )
+        self.textbox_tab_start_from_row.bind('<FocusOut>', self._isnum)
+        self.textbox_tab_start_from_row.grid(column=1, row=0)
+        ### 列
+        self.label_tab_start_from_col = ttk.Label(self.lf_pick_df, text='从表格第?列开始取数据')
+        self.label_tab_start_from_col.grid(column=0, row=1)
+        self.textbox_tab_start_from_col = ttk.Entry(
+            self.lf_pick_df,
+            textvariable=self.txt_tab_start_from_col
+        )
+        self.textbox_tab_start_from_col.bind('<FocusOut>', self._isnum)
+        self.textbox_tab_start_from_col.grid(column=1, row=1)
         ## 选择按钮
         self.btn_filepick_df = ttk.Button(
             self.lf_pick_df, 
             text='选择文件...',
             command=self.filepick_df_callback
         )
-        self.btn_filepick_df.grid(column=0, row=0)
+        self.btn_filepick_df.grid(column=0, row=2)
         ## 路径显示
         self.textbox_df = ttk.Entry(self.lf_pick_df, textvariable=self.txt_df)
         self.textbox_df['state'] = 'disabled'
-        self.textbox_df.grid(column=1, row=0)
+        self.textbox_df.grid(column=1, row=2)
         # self.textbox_df.insert(0, '请选择数据文件')
-        ## 数据区域指定
-        ### 行
-        self.label_tab_start_from_row = ttk.Label(self.lf_pick_df, text='从表格第?行开始取数据')
-        self.label_tab_start_from_row.grid(column=0, row=1)
-        self.textbox_tab_start_from_row = ttk.Entry(
-            self.lf_pick_df,
-            textvariable=self.txt_tab_start_from_row
-        )
-        self.textbox_tab_start_from_row.bind('<FocusOut>', self._isnum)
-        self.textbox_tab_start_from_row.grid(column=1, row=1)
-        ### 列
-        self.label_tab_start_from_col = ttk.Label(self.lf_pick_df, text='从表格第?列开始取数据')
-        self.label_tab_start_from_col.grid(column=0, row=2)
-        self.textbox_tab_start_from_col = ttk.Entry(
-            self.lf_pick_df,
-            textvariable=self.txt_tab_start_from_col
-        )
-        self.textbox_tab_start_from_col.bind('<FocusOut>', self._isnum)
-        self.textbox_tab_start_from_col.grid(column=1, row=2)
 
         # 选择输出路径
         self.lf_outdir = ttk.LabelFrame(self, text='输出文件夹配置（可选）')
@@ -153,7 +156,11 @@ class TtvduwGui(tk.Tk):
         # self.fm_bottom.grid(column=0, row=4)
         self.fm_bottom.pack()
         ## 自定义输出文件名
-        self.btn_custom_outname = ttk.Button(self.fm_bottom, text='选取输出文件名...')
+        self.btn_custom_outname = ttk.Button(
+            self.fm_bottom, 
+            text='选取输出文件名...',
+            command=self.custom_outname_window
+        )
         self.btn_custom_outname.grid(column=0, row=0)
         ## 开始生成
         self.btn_generate = ttk.Button(
@@ -162,7 +169,52 @@ class TtvduwGui(tk.Tk):
             command=self.btn_generate_callback
         )
         self.btn_generate.grid(column=1, row=0)
-        
+
+    def _set_custom_keys(self):
+        custom_keys = []
+        for i, x in enumerate(self._keys_mask):
+            # print(f'{x.get()} ', end="")
+            if x.get() == 1:
+                custom_keys.append(self.data_feeder.keys[i])
+        # print()
+        self.custom_out_names_with_keys = custom_keys
+        print(f'self.custom_out_names_with_keys is {self.custom_out_names_with_keys}')
+
+    def _check_init_keys_mask(self):
+        keys = self.data_feeder.keys
+        # keys 的掩码，后面根据掩码判断留哪个
+        if self._keys_mask is None:
+            # 首次使用，创建掩码
+            self._keys_mask = []
+            for i, k in enumerate(keys):
+                x = tk.Variable()
+                x.set(True)
+                self._keys_mask.append(x)
+
+    def custom_outname_window(self):
+        '''
+        创建一个新窗口，将data_feeder读到的的键列出来（复选框形式）
+        用户可以将一些键作为输出文件名
+        '''
+        self._build_data_feeder()  # 确保self.data_feeder实例存在
+        keys = self.data_feeder.keys
+        self._check_init_keys_mask()
+
+        window = tk.Toplevel(self)
+        window.title('自定义输出文件名')
+        # checkboxes = []
+        for i, key in enumerate(keys):
+            checkbox = ttk.Checkbutton(
+                window,
+                text=key,
+                variable=self._keys_mask[i],
+                onvalue=True,
+                offvalue=False,
+                command=self._set_custom_keys
+            )
+            checkbox.grid(column=0, row=i, sticky=tk.W)
+            # checkboxes.append(checkbox)
+
     def filepick_tpl_callback(self):
         tpl_name = filedialog.askopenfilename(filetypes=TtvduwGui.tpl_filetypes)
         # 如果用户关闭，会选择一个空字符串
@@ -183,7 +235,10 @@ class TtvduwGui(tk.Tk):
         else:
             self.is_df_ready = True
         self.txt_df.set(df_name)
+        self._build_data_feeder()
         self._check_enable_btn_generate()
+        # 使能自定义输出文件名按钮
+        self.btn_custom_outname.state(['!disabled'])
 
     def outdir_pick_callback(self):
         outdir = filedialog.askdirectory()
@@ -201,7 +256,7 @@ class TtvduwGui(tk.Tk):
             df = self._build_data_feeder()   # 设置self.data_feeder
             for c in df.context_feed():
                 the_doc.set_context(c)
-                the_doc.write()
+                the_doc.write(self.custom_out_names_with_keys)
             print('Generation of your very documents are done.')
             msgbox.showinfo(title='提示', message='处理完了')
         except:
@@ -232,6 +287,7 @@ class TtvduwGui(tk.Tk):
                         tab_start_from_row=row_start,
                         tab_start_from_col=col_start
                     )
+                    self._check_init_keys_mask()
                 except InvalidFileException as e_xlsx:
                     print(f'Err: {e_xlsx.args[0]}. Did you specify the xlsx file correctly?')
                     msgbox.showerror(title='xlsx文件问题', message='是否正确选取了作为键值表的xlsx文件？')
