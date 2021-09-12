@@ -54,6 +54,10 @@ class TtvduwGui(tk.Tk):
         # 绘制图形界面
         self.create_widgets()
 
+        # 初始使能：开始生成、自定义输出文件名 按钮禁用
+        self.btn_generate.state(['disabled'])
+        self.btn_custom_outname.state(['disabled'])
+
     def create_widgets(self):
         # 模板选择
         self.lf_pick_tpl = ttk.LabelFrame(self, text='模板')
@@ -160,6 +164,7 @@ class TtvduwGui(tk.Tk):
         else:
             self.is_tpl_ready = True
         self.txt_tpl.set(tpl_name)
+        self._check_enable_btn_generate()
 
     def filepick_df_callback(self):
         df_name = filedialog.askopenfilename(filetypes=TtvduwGui.df_filetypes)
@@ -170,6 +175,7 @@ class TtvduwGui(tk.Tk):
         else:
             self.is_df_ready = True
         self.txt_df.set(df_name)
+        self._check_enable_btn_generate()
 
     def outdir_pick_callback(self):
         outdir = filedialog.askdirectory()
@@ -187,6 +193,8 @@ class TtvduwGui(tk.Tk):
         col_start = int(self.txt_tab_start_from_col.get())
 
         try:
+            self.txt_generate.set('处理中...')
+            self._disable_all_buttons()
             the_doc = DocuPrinter(tpl_name, out_path=outdir)
             with DataFeeder(df_name,
                             tab_start_from_row=row_start,
@@ -196,6 +204,7 @@ class TtvduwGui(tk.Tk):
                     the_doc.set_context(c)
                     the_doc.write()
             print('Generation of your very documents are done.')
+            msgbox.showinfo(title='提示', message='处理完了')
         except PackageNotFoundError as e_docx:
             print(f'Err: {e_docx.args[0]}. Did you specify the template path correctly?')
             msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
@@ -207,7 +216,34 @@ class TtvduwGui(tk.Tk):
             raise
         finally:
             # some cleannings here
-            pass
+            # 使能所有按钮
+            self._enable_all_buttons()
+            # 复位“生成”按钮的标识
+            self.txt_generate.set('生成我需要的文档！')
+
+    
+    def _enable_all_buttons(self):
+        self.btn_filepick_tpl.state(['!disabled'])
+        self.btn_filepick_df.state(['!disabled'])
+        self.btn_outdir.state(['!disabled'])
+        self.btn_custom_outname.state(['!disabled'])
+        self.btn_generate.state(['!disabled'])
+    
+    def _disable_all_buttons(self):
+        self.btn_filepick_tpl.state(['disabled'])
+        self.btn_filepick_df.state(['disabled'])
+        self.btn_outdir.state(['disabled'])
+        self.btn_custom_outname.state(['disabled'])
+        self.btn_generate.state(['disabled'])
+
+    def _check_enable_btn_generate(self):
+        '''
+        检查并使能“生成”按钮
+        '''
+        if self.is_tpl_ready and self.is_df_ready:
+            self.btn_generate.state(['!disabled'])
+        else:
+            self.btn_generate.state(['disabled'])
 
     def _isnum(self, *args):
         '''
