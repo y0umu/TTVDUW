@@ -1,13 +1,11 @@
 '''
 This is The Very Document yoU Want (ttvduw)
 '''
-import argparse
 from pathlib import Path
 import time
 from copy import deepcopy
 from docxtpl import DocxTemplate
 from openpyxl import load_workbook
-
 
 class DocuPrinter():
     '''
@@ -22,7 +20,7 @@ class DocuPrinter():
         self._ori_docx = deepcopy(self.docu.docx)   # hack。让同一个DocxTemplate()能多次使用
         self.context = {}  # 要填充的键值对，由self.set_context正确设置
         
-        if out_path is None:
+        if out_path is None or len(out_path) == 0:
             out_path = Path(tpl_name).stem
         p_out_path = Path(out_path)
         p_out_path.mkdir(exist_ok=True)
@@ -144,43 +142,3 @@ class DataFeeder():
         
         return wb
     
-
-def test():
-    #########
-    ## testing DataFeeder
-    # from test_ttvduw import test_DataFeeder
-    # test_DataFeeder()
-    #########
-    ## testing DocuPrinter
-    # from test_ttvduw import test_DocuPrinter
-    # test_DocuPrinter()
-
-    #########
-    from test_ttvduw import test_all
-    test_all()
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--template', required=True, help='模板文件。docx格式')
-    parser.add_argument('-f', '--data-feeder-file', required=True, help='键值数据表文件。目前只支持xlsx')
-    parser.add_argument('-o', '--out-path', help='输出目录。如果不提供则根据 -t 指定的模板文件名生成')
-    parser.add_argument('--tab-start-from-row', type=int, default=1, help='键值数据表文件从第几行开始有数据(default: 1)')
-    parser.add_argument('--tab-start-from-col', type=int, default=1, help='键值数据表文件从第几列开始有数据(default: 1)')
-    parser.add_argument('--custom-out-names-with-keys', nargs='+', help='使用哪些键的值作为输出文件名')
-    
-    args = parser.parse_args()
-
-    the_doc = DocuPrinter(args.template, out_path=args.out_path)
-    with DataFeeder(args.data_feeder_file,
-                    tab_start_from_row=args.tab_start_from_row,
-                    tab_start_from_col=args.tab_start_from_col,
-                   ) as df:
-        for c in df.context_feed():
-            the_doc.set_context(c)
-            the_doc.write(keys=args.custom_out_names_with_keys)
-
-
-if __name__ == '__main__':
-    # test()
-    main()
-    print('Done')

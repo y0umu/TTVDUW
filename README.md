@@ -18,7 +18,7 @@ pip install -r requirements.txt
 我的Python版本是3.8。
 
 ## 基本用法
-这个app的主程序是`ttvduw.py`。
+这个app的入口是`app_main.py`。
 
 - 用户配置模板（docx格式），在模板中设置占位符1、占位符2…… 占位符的语法是所谓的[Jinja语法](https://jinja.palletsprojects.com/en/3.0.x/templates/)，占位符两侧要用`{{  }}`包裹起来。观看examples目录中的示例文件就能大致明白该怎么书写
 - 用户提供键值数据表（xlsx等），每一列为占位符1、占位符2……以及它们对应的值
@@ -26,12 +26,12 @@ pip install -r requirements.txt
 
 通过一个例子描述会更为清楚：
 ```shell
-python ttvduw.py -t "examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx" -f "examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx" --tab-start-from-row 2 --custom-out-names-with-keys stu_id stu_name
+python app_main.py -t "examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx" -f "examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx" --tab-start-from-row 2 --custom-out-names-with-keys stu_id stu_name
 ```
 
 命令行帮助：
 ```
-usage: ttvduw.py [-h] -t TEMPLATE -f DATA_FEEDER_FILE [-o OUT_PATH] [--tab-start-from-row TAB_START_FROM_ROW]
+usage: app_main.py [-h] -t TEMPLATE -f DATA_FEEDER_FILE [-o OUT_PATH] [--tab-start-from-row TAB_START_FROM_ROW]
                  [--tab-start-from-col TAB_START_FROM_COL]
                  [--custom-out-names-with-keys CUSTOM_OUT_NAMES_WITH_KEYS [CUSTOM_OUT_NAMES_WITH_KEYS ...]]
 
@@ -50,6 +50,11 @@ optional arguments:
   --custom-out-names-with-keys CUSTOM_OUT_NAMES_WITH_KEYS [CUSTOM_OUT_NAMES_WITH_KEYS ...]
                         使用哪些键的值作为输出文件名
 ```
+
+## 其他文件的说明
+`ttvduw.py`: 底层实现
+`ttvduw_gui.py`: 图形用户界面代码
+`test_ttvduw.py`: 测试代码
 
 ## 功能完善路线图
 目前app只有命令行界面，这对广大不熟悉命令行的职员们来说简直就是灾难。考虑实现
