@@ -1,4 +1,5 @@
 from ttvduw import DocuPrinter, DataFeeder
+from ttvduw_gui import TtvduwGui
 
 def test_DocuPrinter():
     context = {
@@ -33,7 +34,7 @@ def test_DataFeeder():
         for c in df.context_feed():
             print(c)
 
-def test_all():
+def test_all_base():
     the_doc = DocuPrinter('examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx')
     with DataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx', 
                     tab_start_from_row=2) as df:
@@ -42,3 +43,6 @@ def test_all():
             the_doc.write(keys=('这个键不存在'))
             # the_doc.write(keys=('stu_id', 'stu_name', '这个键不存在'))
 
+def test_gui():
+    ttvduw_app = TtvduwGui()
+    ttvduw_app.mainloop()
