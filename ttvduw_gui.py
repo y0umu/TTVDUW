@@ -279,7 +279,7 @@ class TtvduwGui(tk.Tk):
                 the_doc.set_context(c)
                 the_doc.write(self.custom_out_names_with_keys)
             print('Generation of your very documents are done.')
-            msgbox.showinfo(title='提示', message='处理完了')
+            msgbox.showinfo(title='提示', message=f'处理完了。文件输出到: {str(the_doc.p_out_path)}')
         except:
             msgbox.showwarning(title='警告', message='遇到了未测试过的问题，详情请查看控制台')
             raise
