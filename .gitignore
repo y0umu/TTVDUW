@@ -3,4 +3,4 @@ ttvduw_venv/
 __pycache__
 dist/
 build/
-app_main.spec
+ttvduw.spec
