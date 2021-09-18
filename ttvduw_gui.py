@@ -323,20 +323,17 @@ class TtvduwGui(tk.Tk):
         return:
         self.docu_printer
         '''
-        if self.docu_printer is None:
-            if self.is_tpl_ready:
-                tpl_name = self.txt_tpl.get()
-                outdir = self.txt_outdir.get()
-                try:
-                    self.docu_printer = DocuPrinter(tpl_name, out_path=outdir)
-                except PackageNotFoundError as e_docx:
-                    print(f'Err: {e_docx.args[0]}. Did you specify the template path correctly?')
-                    msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
-            else:  # self.is_tpl_ready ==False
-                print('Template path not specified. Specify it first!')
-                msgbox.showinfo(title='提示', message='你得选择模板文件')
-        else:  # self.docu_printer is not None
-            pass
+        if self.is_tpl_ready:
+            tpl_name = self.txt_tpl.get()
+            outdir = self.txt_outdir.get()
+            try:
+                self.docu_printer = DocuPrinter(tpl_name, out_path=outdir)
+            except PackageNotFoundError as e_docx:
+                print(f'Err: {e_docx.args[0]}. Did you specify the template path correctly?')
+                msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
+        else:  # self.is_tpl_ready ==False
+            print('Template path not specified. Specify it first!')
+            msgbox.showinfo(title='提示', message='你得选择模板文件')
         return self.docu_printer
     
     def _enable_all_buttons(self):
