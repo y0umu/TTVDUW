@@ -47,6 +47,7 @@ class DocuPrinter():
         # 设置输出文件名
         out_name = ""
         use_fallback_filename = False
+        # print(f'received keys: {keys}')
         if keys is None:
             use_fallback_filename = True
         else:
@@ -125,7 +126,7 @@ class DataFeeder():
                 # 返回""时，会让模板中对应位置什么有没有
                 # this_row = [ x.value for x in r]
                 this_row = [ x.value if x.value is not None else "" for x in r]
-                this_row = this_row[self.min_col-1:]  # discarding unwanted colums
+
                 yield this_row
         else:
             raise NotImplementedError("Support of file type {} is not yet implemented".format(ftype))
@@ -140,11 +141,7 @@ class DataFeeder():
         if self.ftype == 'xlsx':
             wb = self.wb_xlsx
             ws = wb.active
-            ws_data_rows = ws.iter_rows()
-            # discarding the unwanted rows
-            if self.min_row > 1:
-                for _i in range(self.min_row - 1):
-                    next(ws_data_rows)
+            ws_data_rows = ws.iter_rows(min_row=self.min_row, min_col=self.min_col)
             keys_row = next(ws_data_rows)  # 认为表格区的第1行是键名（字段名）
             return keys_row, ws_data_rows
         else:

@@ -18,7 +18,7 @@ pip install -r requirements.txt
 我的Python版本是3.8。不过Python 3.9、3.10应该也能使用
 
 ## 基本用法
-这个app的入口是`app_main.py`。有图形用户界面和命令行两种接口。
+这个app的入口是`app_main.py`。有图形用户界面和命令行两种接口。如果不带任何命令行参数执行app_main.py，就会启动图形界面。
 
 无论使用图形界面还是命令行，都需要准备模板和键值数据表
 - 用户配置模板（docx格式），在模板中设置占位符1、占位符2…… 占位符的语法是所谓的[Jinja语法](https://jinja.palletsprojects.com/en/3.0.x/templates/)，占位符两侧要用`{{  }}`包裹起来。观看examples目录中的示例文件就能大致明白该怎么书写
