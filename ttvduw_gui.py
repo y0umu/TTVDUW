@@ -180,16 +180,14 @@ class TtvduwGui(tk.Tk):
         self.custom_out_names_with_keys = custom_keys
         print(f'self.custom_out_names_with_keys is {self.custom_out_names_with_keys}')
 
-    def _check_init_keys_mask(self):
+    def _init_keys_mask(self):
         keys = self.data_feeder.keys
         # keys 的掩码，后面根据掩码判断留哪个
-        if self._keys_mask is None:
-            # 首次使用，创建掩码
-            self._keys_mask = []
-            for i, k in enumerate(keys):
-                x = tk.Variable()
-                x.set(True)
-                self._keys_mask.append(x)
+        self._keys_mask = []
+        for i, k in enumerate(keys):
+            x = tk.Variable()
+            x.set(False)
+            self._keys_mask.append(x)
 
     def custom_outname_window(self):
         '''
@@ -198,14 +196,33 @@ class TtvduwGui(tk.Tk):
         '''
         self._build_data_feeder()  # 确保self.data_feeder实例存在
         keys = self.data_feeder.keys
-        self._check_init_keys_mask()
+        self._init_keys_mask()
 
         window = tk.Toplevel(self)
         window.title('自定义输出文件名')
-        # checkboxes = []
+        window.grab_set()   # so that this window is modal
+
+        # 最多在图形界面上展示too_many_keys_thersh个复选框
+        has_too_many_keys = False
+        too_many_keys_thersh = 20
+        label_1 = ttk.Label(
+            window,
+            text=f"你可以选择如下字段名来设置输出文件名。这里最多显示{too_many_keys_thersh}个字段"
+        )
+        label_1.pack()
+        label_2 = ttk.Label(
+            window,
+            text=f"如果你想要的字段不在这里面，你应该考虑使用这个程序的命令行"
+        )
+        label_2.pack()
+        
+        # 把复选框们放在一个Frame里面
+        fm = ttk.Frame(window)
+        fm.pack()
+
         for i, key in enumerate(keys):
             checkbox = ttk.Checkbutton(
-                window,
+                fm,
                 text=key,
                 variable=self._keys_mask[i],
                 onvalue=True,
@@ -213,7 +230,11 @@ class TtvduwGui(tk.Tk):
                 command=self._set_custom_keys
             )
             checkbox.grid(column=0, row=i, sticky=tk.W)
-            # checkboxes.append(checkbox)
+            if i > too_many_keys_thersh:
+                has_too_many_keys = True
+                break
+        if has_too_many_keys:
+            print("You have many keys. If the GUI cannot satisfy your needs of customizing the output names, you should consider using the command line interface.")
 
     def filepick_tpl_callback(self):
         tpl_name = filedialog.askopenfilename(filetypes=TtvduwGui.tpl_filetypes)
@@ -267,35 +288,32 @@ class TtvduwGui(tk.Tk):
             # 使能所有按钮
             self._enable_all_buttons()
             # 复位“生成”按钮的标识
-            self.txt_generate.set('生成我需要的文档！')
+            self.txt_generate.set('生成我想要的文档！')
 
     def _build_data_feeder(self):
         '''
-        "lazy"生成DataFeeder实例，并设置self.data_feeder
+        生成DataFeeder实例，并设置self.data_feeder
 
         return:
         self.data_feeder
         '''
-        if self.data_feeder is None:
-            if self.is_df_ready:
-                df_name = self.txt_df.get()
-                row_start = int(self.txt_tab_start_from_row.get())
-                col_start = int(self.txt_tab_start_from_col.get())
-                try:
-                    self.data_feeder = DataFeeder(
-                        df_name,
-                        tab_start_from_row=row_start,
-                        tab_start_from_col=col_start
-                    )
-                    self._check_init_keys_mask()
-                except InvalidFileException as e_xlsx:
-                    print(f'Err: {e_xlsx.args[0]}. Did you specify the xlsx file correctly?')
-                    msgbox.showerror(title='xlsx文件问题', message='是否正确选取了作为键值表的xlsx文件？')
-            else:  # self.is_df_ready == False
-                print('Data feeder path not specified. Specify it first!')
-                msgbox.showinfo(title='提示', message='你应该先选择键值数据表文件')
-        else:  # self.data_feeder is not None
-            pass
+        if self.is_df_ready:
+            df_name = self.txt_df.get()
+            row_start = int(self.txt_tab_start_from_row.get())
+            col_start = int(self.txt_tab_start_from_col.get())
+            try:
+                self.data_feeder = DataFeeder(
+                    df_name,
+                    tab_start_from_row=row_start,
+                    tab_start_from_col=col_start
+                )
+                self._init_keys_mask()
+            except InvalidFileException as e_xlsx:
+                print(f'Err: {e_xlsx.args[0]}. Did you specify the xlsx file correctly?')
+                msgbox.showerror(title='xlsx文件问题', message='是否正确选取了作为键值表的xlsx文件？')
+        else:  # self.is_df_ready == False
+            print('Data feeder path not specified. Specify it first!')
+            msgbox.showinfo(title='提示', message='你得选择键值数据表文件')
         return self.data_feeder
     
     def _build_docu_printer(self):
@@ -316,7 +334,7 @@ class TtvduwGui(tk.Tk):
                     msgbox.showerror(title='docx文件问题', message='是否正确选取了作为模板的docx文件？')
             else:  # self.is_tpl_ready ==False
                 print('Template path not specified. Specify it first!')
-                msgbox.showinfo(title='提示', message='你应该先选择模板文件')
+                msgbox.showinfo(title='提示', message='你得选择模板文件')
         else:  # self.docu_printer is not None
             pass
         return self.docu_printer
@@ -352,22 +370,23 @@ class TtvduwGui(tk.Tk):
         row_str = self.txt_tab_start_from_row.get()
         if col_str.isdigit() == False:
             self.txt_tab_start_from_col.set('1')
-            msgbox.showerror(title='？？？', message='你应该输入数字')
+            msgbox.showerror(title='？？？', message='你得输入数字')
             return
         if row_str.isdigit() == False:
            self.txt_tab_start_from_row.set('1')
-           msgbox.showerror(title='？？？', message='你应该输入数字')
+           msgbox.showerror(title='？？？', message='你得输入数字')
            return
         col = int(col_str)
         row = int(row_str)
         if col <= 0:
             self.txt_tab_start_from_col.set('1')
-            msgbox.showerror(title='？？？', message='你应该输入不小于1的整数')
+            msgbox.showerror(title='？？？', message='你得输入不小于1的整数')
             return
         if row <= 0:
             self.txt_tab_start_from_row.set('1')
-            msgbox.showerror(title='？？？', message='你应该输入不小于1的整数')
+            msgbox.showerror(title='？？？', message='你得输入不小于1的整数')
             return
+
 
     def _on_exit(self):
         '''
