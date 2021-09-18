@@ -1,3 +1,6 @@
 ttvduw_venv/
 .vscode/
 __pycache__
+dist/
+build/
+app_main.spec
