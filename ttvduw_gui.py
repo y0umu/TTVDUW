@@ -202,12 +202,12 @@ class TtvduwGui(tk.Tk):
         window.title('自定义输出文件名')
         window.grab_set()   # so that this window is modal
 
-        # 最多在图形界面上展示too_many_keys_thersh个复选框
+        # 最多在图形界面上展示too_many_keys_thresh个复选框
         has_too_many_keys = False
-        too_many_keys_thersh = 20
+        too_many_keys_thresh = 20
         label_1 = ttk.Label(
             window,
-            text=f"你可以选择如下字段名来设置输出文件名。这里最多显示{too_many_keys_thersh}个字段"
+            text=f"你可以选择如下字段名来设置输出文件名。这里最多显示{too_many_keys_thresh}个字段"
         )
         label_1.pack()
         label_2 = ttk.Label(
@@ -230,7 +230,7 @@ class TtvduwGui(tk.Tk):
                 command=self._set_custom_keys
             )
             checkbox.grid(column=0, row=i, sticky=tk.W)
-            if i > too_many_keys_thersh:
+            if i > too_many_keys_thresh:
                 has_too_many_keys = True
                 break
         if has_too_many_keys:
