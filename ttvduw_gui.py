@@ -21,7 +21,7 @@ class TtvduwGui(tk.Tk):
 
     def __init__(self):
         super().__init__()
-        self.geometry('300x400')
+        # self.geometry('300x400')
         self.title('这就是你想要的文档')
         self.gui_help = '''1. 选择模板的路径
 2. 选择键值数据表（xlsx文件）的路径
