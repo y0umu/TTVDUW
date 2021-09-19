@@ -253,13 +253,16 @@ class TtvduwGui(tk.Tk):
         print(f'"{df_name}" selected as df_name')
         if len(df_name) <= 0:
             self.is_df_ready = False
+            # 禁用自定义输出文件名按钮
+            self.btn_custom_outname.state(['disabled'])
         else:
             self.is_df_ready = True
+            # 使能自定义输出文件名按钮
+            self.btn_custom_outname.state(['!disabled'])
         self.txt_df.set(df_name)
         self._build_data_feeder()
         self._check_enable_btn_generate()
-        # 使能自定义输出文件名按钮
-        self.btn_custom_outname.state(['!disabled'])
+        
 
     def outdir_pick_callback(self):
         outdir = filedialog.askdirectory()
