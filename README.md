@@ -26,7 +26,7 @@ python app_main.py
 
 这个app的入口是`app_main.py`，提供图形用户界面和命令行界面。如果不带任何命令行参数执行`app_main.py`，就会启动图形界面。
 
-Windows用户也可以直接[下载](https://github.com/y0umu/TTVDUW/releases/)使用Pyinstaller打包的二进制程序，而不必配置环境。在这种情况下，解压TTVDUW.zip后，运行TTVDUW.exe即可看到用户界面。
+Windows用户也可以直接[下载](https://github.com/y0umu/TTVDUW/releases/)使用Pyinstaller打包的二进制程序，而不必配置环境。在这种情况下，解压后，运行TTVDUW.exe即可看到用户界面。
 
 无论使用图形界面还是命令行，都需要准备**模板**和**键值数据表**。
 
