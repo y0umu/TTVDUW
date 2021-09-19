@@ -27,13 +27,13 @@ class TtvduwGui(tk.Tk):
 2. 选择键值数据表（xlsx文件）的路径
 3. 选择输出文件夹 [非必选]
 4. 配置输出文件名 [非必选]
-5. 点击"生成我需要的文档！"按钮'''
+5. 点击"生成我想要的文档！"按钮'''
 
         self.txt_tpl = tk.StringVar()  # 所选择模板的路径
         self.txt_df = tk.StringVar()   # 所选择键值数据表DataFeeder文件（xlsx等）文件的路径
         self.txt_outdir = tk.StringVar() # 输出目录
-        self.txt_generate = tk.StringVar() # “生成”按钮显示的文本。可能值：['生成我需要的文档！', '生成中...']
-        self.txt_generate.set('生成我需要的文档！')
+        self.txt_generate = tk.StringVar() # “生成”按钮显示的文本。可能值：['生成我想要的文档！', '生成中...']
+        self.txt_generate.set('生成我想要的文档！')
         
         # grid config
         self.columnconfigure(0, weight=1)

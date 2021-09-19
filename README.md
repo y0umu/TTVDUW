@@ -1,4 +1,4 @@
-# 这就是你想要的文件 This is The Very Document yoU Want (TTVDUW)
+# 这就是你想要的文档 This is The Very Document yoU Want (TTVDUW)
 
 ## 这是干什么用的
 这是一个**填表工具**，它可以根据**模板**和**给定表格**批量生成你想要的文件。
@@ -61,7 +61,7 @@ Windows用户也可以直接[下载](https://github.com/y0umu/TTVDUW/releases/)�
 - 注2：目前程序图形界面限制了最多显示20个字段（`ttvduw_gui.TtvduwGui.custom_outname_window`）。如果20个字段已经满足不了你的要求了，请用命令行（参数`--custom-out-names-with-keys`）。
 - 注3（Bug？）：对于那些数据区域挨着一行被合并单元格的excel表格，本app使用的openpyxl在读取表格行的时候，会读出一行有16384个数据。虽然大部分情况感觉不到这一点，但是在这个选择输出文件名的模块会有体现：不对应实际表格区域的单元格被当作字段名收了进来，字段名显示为“None”。
 
-关于**生成我需要的文档**按钮：这个不得了的按钮就像是奇迹的见证者。
+关于**生成我想要的文档**按钮：这个不得了的按钮就像是奇迹的见证者。
 
 ### 命令行
 命令行界面适合经常使用固定参数操作，或者需要编写脚本的用户。对此感到陌生的人应该直接去看[图形用户界面](#图形用户界面)这一节。
@@ -90,7 +90,7 @@ optional arguments:
 
 ```
 
-通过一个例子描述会更为清楚：
+例如：
 ```shell
 python app_main.py -t "examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx" -f "examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx" --tab-start-from-row 2 --custom-out-names-with-keys stu_id stu_name
 ```
