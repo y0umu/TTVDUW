@@ -63,6 +63,8 @@ class DocuPrinter():
         if use_fallback_filename:
             print('WARN: No valid keys given. Use fallback output filename')
             out_name = str(time.time() )   # fallback filename
+        else:
+            out_name = out_name[:-1]  # 去掉最后一个"_"字符
         
         out_name += '.docx'
         out_name = str(self.p_out_path / Path(out_name))
