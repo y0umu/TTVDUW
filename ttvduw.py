@@ -109,7 +109,7 @@ class DataFeeder():
 
     def context_feed(self):
         '''
-        这是一个生成器，喂给DocxTemplate.get_context()
+        这是一个生成器，喂给DocxTemplate.set_context()
         '''
         context = {}
         data_gen = self._DataGen()
