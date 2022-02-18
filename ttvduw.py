@@ -94,7 +94,7 @@ class DataFeeder():
         if ftype == 'xlsx':
             self.wb_xlsx = self._load_with_xlsx()
         else:
-            raise NotImplementedError("Support of file type {} is not yet implemented".format(ftype))
+            raise NotImplementedError("Support of file type {} is not yet implemented".format(self.ftype))
     
     def __enter__(self):
         return self
@@ -131,7 +131,7 @@ class DataFeeder():
 
                 yield this_row
         else:
-            raise NotImplementedError("Support of file type {} is not yet implemented".format(ftype))
+            raise NotImplementedError("Support of file type {} is not yet implemented".format(self.ftype))
     
     def _get_ws_key_data_rows(self):
         '''
