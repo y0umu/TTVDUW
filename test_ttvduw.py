@@ -1,4 +1,4 @@
-from ttvduw import DocuPrinter, DataFeeder
+from ttvduw import DocuPrinter, XlsxDataFeeder, CsvDataFeeder
 from ttvduw_gui import TtvduwGui
 
 def test_DocuPrinter():
@@ -28,20 +28,27 @@ def test_DocuPrinter():
     the_doc.set_context(context)
     the_doc.write(['stu_name'])
 
-def test_DataFeeder():
-    with DataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx', 
+def test_XlsxDataFeeder():
+    with XlsxDataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx', 
+                    tab_start_from_row=2) as df:
+        for c in df.context_feed():
+            print(c)
+
+def test_CsvDataFeeder():
+    with CsvDataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.csv', 
                     tab_start_from_row=2) as df:
         for c in df.context_feed():
             print(c)
 
 def test_all_base():
     the_doc = DocuPrinter('examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx')
-    with DataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx', 
+    with XlsxDataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.xlsx', 
                     tab_start_from_row=2) as df:
         for c in df.context_feed():
             the_doc.set_context(c)
             the_doc.write(keys=('这个键不存在'))
             # the_doc.write(keys=('stu_id', 'stu_name', '这个键不存在'))
+
 
 def test_gui():
     ttvduw_app = TtvduwGui()

@@ -3,6 +3,7 @@ This is The Very Document yoU Want (ttvduw)
 '''
 from pathlib import Path
 import time
+import csv
 from copy import deepcopy
 from docxtpl import DocxTemplate
 from openpyxl import load_workbook
@@ -70,32 +71,72 @@ class DocuPrinter():
         out_name = str(self.p_out_path / Path(out_name))
         docu.save(out_name)
         self.docu.docx = deepcopy(self._ori_docx)   # 重置DocxTemplate().docx使这个模板能再次使用
-    
+
 
 class DataFeeder():
     '''
-    读取数据表格的接口类
+    XlsxDataFeeder, CsvDataFeeder的父类
     '''
-    def __init__(self, fname: str, ftype='xlsx', 
-                 tab_start_from_row=1, tab_start_from_col=1):
+    def __init__(self, fname: str, 
+                 tab_start_from_row=1,
+                 tab_start_from_col=1):
         '''
         fname: str. 输入数据文件路径
-        ftype: str. 目前只能选择 'xlsx'
         tab_start_from_row: int. 数据从第几行开始（默认：1）
         tab_start_from_col: int. 数据从第几列开始（默认：1）
         '''
         self.fname = fname
-        self.ftype = ftype
         self.min_row = tab_start_from_row
         self.min_col = tab_start_from_col
-        self.keys = None     # 存储读取到的表格区键名，self._load_with_xlsx将正确设置此变量
-        # self.data_gen = None # 存储键值的生成器，self._DataGen将正确设置此变量
-        self.wb_xlsx = None  # 存储xlsx类型, ftype == 'xlsx'时使用
-        if ftype == 'xlsx':
-            self.wb_xlsx = self._load_with_xlsx()
-        else:
-            raise NotImplementedError("Support of file type {} is not yet implemented".format(self.ftype))
+        self._keys = None      # 存储读取到的表格区键名，此类派生的子类负责设置此变量
     
+    def _record_gen(self):
+        '''
+        子类应该重新实现本方法，使其返回一个可迭代对象，或者使本方法变成生成器。
+        
+        这个生成器应该生成list。每一个list都是键值数据表的一条记录。
+        '''
+        return []
+    
+    def load_file(self):
+        '''
+        子类应重新实现本方法， 使其装载datafeeder文件，并设置 self._keys的值
+        '''
+        self._keys = []
+
+    def get_keys(self):
+        '''
+        返回self._keys
+        '''
+        return self._keys
+    
+    def context_feed(self):
+        '''
+        这是一个生成器，喂给DocxTemplate.set_context()
+        '''
+        context = {}
+        record_gen = self._record_gen()
+        for r in record_gen:
+            for k,v in zip(self._keys, r):
+                context[k] = v
+            yield context
+
+
+
+class XlsxDataFeeder(DataFeeder):
+    '''
+    读取数据xlsx表格的接口类
+    '''
+    def __init__(self, fname: str, 
+                 tab_start_from_row=1, tab_start_from_col=1):
+        '''
+        fname: str. 输入数据文件路径
+        tab_start_from_row: int. 数据从第几行开始（默认：1）
+        tab_start_from_col: int. 数据从第几列开始（默认：1）
+        '''
+        super().__init__(fname, tab_start_from_row, tab_start_from_col)
+        self._wb_xlsx = self.load_file()  # 存储xlsx的实例，load_file 创建之， __exit__ 销毁之
+
     def __enter__(self):
         return self
     
@@ -103,69 +144,102 @@ class DataFeeder():
         '''
         exc_args: tuple of (exc_type, exc_val, exc_tb)
         '''
-        if self.ftype == 'xlsx':
-            self.wb_xlsx.close()
-            print('debug: DataFeeder cleanned')
+        self._wb_xlsx.close()
+        print('debug: XlsxDataFeeder cleanned')
 
-    def context_feed(self):
-        '''
-        这是一个生成器，喂给DocxTemplate.set_context()
-        '''
-        context = {}
-        data_gen = self._DataGen()
-        for data in data_gen:
-            for k,v in zip(self.keys, data):
-                context[k] = v
-            yield context
+    def _record_gen(self):
+        # keys_row, record_rows = self._get_ws_key_record_rows()
 
-    def _DataGen(self):
-        if self.ftype == 'xlsx':
-            keys_row, data_rows = self._get_ws_key_data_rows()
-            # 将表格中的行转换成python list
-            for r in data_rows:   # 余下的是每个记录具体的值
-                ## 争议：空单元格应该直接返回None（默认行为）还是改写为""（空字符串）
-                # 返回None时，如果模板中没有任何条件判断，就会印出"None"这四个字母
-                # 返回""时，会让模板中对应位置什么有没有
-                # this_row = [ x.value for x in r]
-                this_row = [ x.value if x.value is not None else "" for x in r]
+        # 将表格中的行转换成python list
+        for r in self._record_rows:   # 余下的是每个记录具体的值
+            ## 争议：空单元格应该直接返回None（默认行为）还是改写为""（空字符串）
+            # 返回None时，如果模板中没有任何条件判断，就会印出"None"这四个字母
+            # 返回""时，会让模板中对应位置什么有没有
+            # this_row = [ x.value for x in r]
+            this_row = [ x.value if x.value is not None else "" for x in r]
 
-                yield this_row
-        else:
-            raise NotImplementedError("Support of file type {} is not yet implemented".format(self.ftype))
+            yield this_row
     
-    def _get_ws_key_data_rows(self):
+    def _get_ws_key_record_rows(self):
         '''
         获取xlsx工作表中的键行，以及数据行生成器
         
         return:
-        keys_row, ws_data_rows
+        keys_row, ws_record_rows
         '''
-        if self.ftype == 'xlsx':
-            wb = self.wb_xlsx
-            ws = wb.active
-            ws_data_rows = ws.iter_rows(min_row=self.min_row, min_col=self.min_col)
-            keys_row = next(ws_data_rows)  # 认为表格区的第1行是键名（字段名）
-            return keys_row, ws_data_rows
-        else:
-            raise UserWarning('You should not call this method if not using xlsx')
+        wb = self._wb_xlsx
+        ws = wb.active
+        ws_record_rows = ws.iter_rows(min_row=self.min_row, min_col=self.min_col)
+        keys_row = next(ws_record_rows)  # 认为表格区的第1行是键名（字段名）
+        return keys_row, ws_record_rows
 
-    def _load_with_xlsx(self):
+    def load_file(self):
+        '''
+        装载 xlsx文件，并设置 self._keys
+        '''
         wb = load_workbook(self.fname, read_only=True, data_only=True)
-        self.wb_xlsx = wb
-        keys_row, data_row = self._get_ws_key_data_rows()
-
+        self._wb_xlsx = wb
+        keys_row, record_rows = self._get_ws_key_record_rows()
+        self._record_rows = record_rows
         keys = [ str(x.value) for x in keys_row ]  # 转换成 python list
-        ## 暂时不能跳过空单元格的原因是：
-        ## self.context_feed 里面用了zip将keys与每一行一一对应
-        ## 跳过keys那一行的空单元格（“空”键）会导致非空单元格（非“空”键）与其值不能对应上
-        ## （“空”键与值的对应无论如何都是错的）
-        # keys = []
-        # for x in keys_row:
-        #     if x.value is None:  # 跳过空单元格
-        #         continue
-        #     keys.append(str(x.value))
-        self.keys = keys
-        # self.data_gen = self._DataGen()
+        self._keys = keys
         
         return wb
     
+
+class CsvDataFeeder(DataFeeder):
+    '''
+    读取数据xlsx表格的接口类
+    '''
+    def __init__(self, fname: str, 
+                 tab_start_from_row=1, tab_start_from_col=1):
+        '''
+        fname: str. 输入数据文件路径
+        tab_start_from_row: int. 数据从第几行开始（默认：1）
+        tab_start_from_col: int. 数据从第几列开始（默认：1）
+        '''
+        super().__init__(fname, tab_start_from_row, tab_start_from_col)
+        self._csvreader = None   # 由 load_file 设置
+        self._csvfile = self.load_file()
+        
+
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *exc_args):
+        '''
+        exc_args: tuple of (exc_type, exc_val, exc_tb)
+        '''
+        self._csvfile.close()
+        print('debug: CsvDataFeeder cleanned')
+
+    def load_file(self):
+        csvfile = open(self.fname, newline='', encoding='utf-8')
+        contents = csvfile.read(512)
+        dialect = csv.Sniffer().sniff(contents)
+        csvfile.seek(0)
+        self._csvreader = csv.reader(csvfile, dialect)
+
+        self._keys, self._records = self._get_csv_key_record_rows()
+
+        return csvfile
+
+    def _get_csv_key_record_rows(self):
+        '''
+        获取csv中的键行，以及数据行生成器
+        
+        return:
+        keys_row, record_rows_reader
+        '''
+        # 表格区不是从第1行开始的
+        if self.min_row > 1:
+            for _i in range(self.min_row - 1):
+                next(self._csvreader)
+        keys_row = next(self._csvreader) # 认为表格区的第1行是键名（字段名）
+        record_rows_reader = self._csvreader
+        return keys_row, record_rows_reader
+    
+    def _record_gen(self):
+        for r in self._records:   # 余下的是每个记录具体的值
+            print(f"debug: r == {r}")
+            yield r

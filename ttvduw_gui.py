@@ -9,7 +9,7 @@ from tkinter import messagebox as msgbox
 from docx.opc.exceptions import PackageNotFoundError
 from openpyxl.utils.exceptions import InvalidFileException
 
-from ttvduw import DocuPrinter, DataFeeder
+from ttvduw import DocuPrinter, XlsxDataFeeder
 
 class TtvduwGui(tk.Tk):
     tpl_filetypes = (
@@ -305,7 +305,7 @@ class TtvduwGui(tk.Tk):
             row_start = int(self.txt_tab_start_from_row.get())
             col_start = int(self.txt_tab_start_from_col.get())
             try:
-                self.data_feeder = DataFeeder(
+                self.data_feeder = XlsxDataFeeder(
                     df_name,
                     tab_start_from_row=row_start,
                     tab_start_from_col=col_start
@@ -364,7 +364,7 @@ class TtvduwGui(tk.Tk):
 
     def _isnum(self, *args):
         '''
-        表格起始行/列输入正确性坚持
+        表格起始行/列输入正确性检查
         '''
         col_str = self.txt_tab_start_from_col.get()
         row_str = self.txt_tab_start_from_row.get()
