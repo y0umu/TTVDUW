@@ -90,6 +90,18 @@ class DataFeeder():
         self.min_col = tab_start_from_col
         self._keys = None      # 存储读取到的表格区键名，此类派生的子类负责设置此变量
     
+    # def __enter__(self):
+    #     '''
+    #     如果子类需要，应该重新实现本方法
+    #     '''
+    #     return self
+    
+    # def __exit__(self, *exc_args):
+    #     '''
+    #     如果子类需要，应该重新实现本方法
+    #     '''
+    #     pass
+    
     def _record_gen(self):
         '''
         子类应该重新实现本方法，使其返回一个可迭代对象，或者使本方法变成生成器。
@@ -104,6 +116,12 @@ class DataFeeder():
         '''
         self._keys = []
 
+    def get_key(self, i: int):
+        '''
+        返回下标为i的self._keys中的元素
+        '''
+        return self._keys[i]
+    
     def get_keys(self):
         '''
         返回self._keys
@@ -182,7 +200,7 @@ class XlsxDataFeeder(DataFeeder):
         keys_row, record_rows = self._get_ws_key_record_rows()
         self._record_rows = record_rows
         keys = [ str(x.value) for x in keys_row ]  # 转换成 python list
-        self._keys = keys
+        self._keys = keys[(self.min_col-1):]
         
         return wb
     
@@ -220,7 +238,8 @@ class CsvDataFeeder(DataFeeder):
         csvfile.seek(0)
         self._csvreader = csv.reader(csvfile, dialect)
 
-        self._keys, self._records = self._get_csv_key_record_rows()
+        keys_row, self._record_rows = self._get_csv_key_record_rows()
+        self._keys = keys_row[(self.min_col-1):]
 
         return csvfile
 
@@ -240,6 +259,7 @@ class CsvDataFeeder(DataFeeder):
         return keys_row, record_rows_reader
     
     def _record_gen(self):
-        for r in self._records:   # 余下的是每个记录具体的值
-            print(f"debug: r == {r}")
-            yield r
+        for r in self._record_rows:   # 余下的是每个记录具体的值
+            # print(f"debug: r == {r}")
+            # 表格区不是从第1列开始的
+            yield r[(self.min_col-1):]

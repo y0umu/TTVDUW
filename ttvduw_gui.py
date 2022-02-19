@@ -9,14 +9,15 @@ from tkinter import messagebox as msgbox
 from docx.opc.exceptions import PackageNotFoundError
 from openpyxl.utils.exceptions import InvalidFileException
 
-from ttvduw import DocuPrinter, XlsxDataFeeder
+from ttvduw import DocuPrinter
+from ttvduw_utils import select_datafeeder
 
 class TtvduwGui(tk.Tk):
     tpl_filetypes = (
         ('Word 文档', '*.docx'),
     )
     df_filetypes = (
-        ('Excel 工作簿', '*.xlsx'),
+        ('Excel 工作簿 / 逗号分隔值 (CSV) 文件', '*.xlsx *.csv'),
     )
 
     def __init__(self):
@@ -24,7 +25,7 @@ class TtvduwGui(tk.Tk):
         # self.geometry('300x400')
         self.title('这就是你想要的文档')
         self.gui_help = '''1. 选择模板的路径
-2. 选择键值数据表（xlsx文件）的路径
+2. 选择键值数据表 ( xlsx/csv 文件) 的路径
 3. 选择输出文件夹 [非必选]
 4. 配置输出文件名 [非必选]
 5. 点击"生成我想要的文档！"按钮'''
@@ -175,13 +176,13 @@ class TtvduwGui(tk.Tk):
         for i, x in enumerate(self._keys_mask):
             # print(f'{x.get()} ', end="")
             if x.get() == 1:
-                custom_keys.append(self.data_feeder.keys[i])
+                custom_keys.append(self.data_feeder.get_key(i))
         # print()
         self.custom_out_names_with_keys = custom_keys
         print(f'self.custom_out_names_with_keys is {self.custom_out_names_with_keys}')
 
     def _init_keys_mask(self):
-        keys = self.data_feeder.keys
+        keys = self.data_feeder.get_keys()
         # keys 的掩码，后面根据掩码判断留哪个
         self._keys_mask = []
         for i, k in enumerate(keys):
@@ -195,7 +196,7 @@ class TtvduwGui(tk.Tk):
         用户可以将一些键作为输出文件名
         '''
         self._build_data_feeder()  # 确保self.data_feeder实例存在
-        keys = self.data_feeder.keys
+        keys = self.data_feeder.get_keys()
         self._init_keys_mask()
 
         window = tk.Toplevel(self)
@@ -305,7 +306,8 @@ class TtvduwGui(tk.Tk):
             row_start = int(self.txt_tab_start_from_row.get())
             col_start = int(self.txt_tab_start_from_col.get())
             try:
-                self.data_feeder = XlsxDataFeeder(
+                DF = select_datafeeder(df_name)
+                self.data_feeder = DF(
                     df_name,
                     tab_start_from_row=row_start,
                     tab_start_from_col=col_start

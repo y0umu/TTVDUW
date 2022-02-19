@@ -1,4 +1,5 @@
 import argparse
+from pydoc import describe
 import sys
 from ttvduw import DocuPrinter
 from ttvduw_gui import TtvduwGui
@@ -28,7 +29,8 @@ def test():
     pass
 
 def main():
-    parser = argparse.ArgumentParser()
+    desc = '根据模板和数据批量生成文档，这就是你想要的文档。 Producing documents with given template and data. This is The Very Document yoU Want (TTVDUW) '
+    parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('-t', '--template', required=True, help='模板文件。docx格式')
     parser.add_argument('-f', '--data-feeder-file', required=True, help='键值数据表文件。目前支持xlsx, csv')
     parser.add_argument('-o', '--out-path', help='输出目录。如果不提供则根据 -t 指定的模板文件名生成')
