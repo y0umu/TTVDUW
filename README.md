@@ -22,7 +22,7 @@ pip install -r requirements.txt
 # 运行
 python app_main.py
 ```
-我的Python版本是3.8。不过Python 3.9、3.10应该也能使用。
+目前的版本使用Python 3.10开发。
 
 这个app的入口是`app_main.py`，提供图形用户界面和命令行界面。如果不带任何命令行参数执行`app_main.py`，就会启动图形界面。
 
@@ -73,12 +73,15 @@ usage: app_main.py [-h] -t TEMPLATE -f DATA_FEEDER_FILE [-o OUT_PATH]
                    [--tab-start-from-col TAB_START_FROM_COL]
                    [--custom-out-names-with-keys CUSTOM_OUT_NAMES_WITH_KEYS [CUSTOM_OUT_NAMES_WITH_KEYS ...]]
 
-optional arguments:
+根据模板和数据批量生成文档，这就是你想要的文档。 Producing documents with given template and data.
+This is The Very Document yoU Want (TTVDUW)
+
+options:
   -h, --help            show this help message and exit
   -t TEMPLATE, --template TEMPLATE
                         模板文件。docx格式
   -f DATA_FEEDER_FILE, --data-feeder-file DATA_FEEDER_FILE
-                        键值数据表文件。目前只支持xlsx
+                        键值数据表文件。目前支持xlsx, csv
   -o OUT_PATH, --out-path OUT_PATH
                         输出目录。如果不提供则根据 -t 指定的模板文件名生成
   --tab-start-from-row TAB_START_FROM_ROW
@@ -87,7 +90,6 @@ optional arguments:
                         键值数据表文件从第几列开始有数据(default: 1)
   --custom-out-names-with-keys CUSTOM_OUT_NAMES_WITH_KEYS [CUSTOM_OUT_NAMES_WITH_KEYS ...]
                         使用哪些键的值作为输出文件名
-
 ```
 
 例如：
@@ -118,7 +120,7 @@ pyinstaller --path . --name TTVDUW .\app_main.py
 - [x] 打包
 
 目前键值数据表只实现了xlsx的支持，后续还希望实现csv、xls支持。（看起来没多少事实际上界面各种逻辑估计涉及不少重写）
-- [ ] csv （通过Python自带的csv包）
+- [x] csv （通过Python自带的csv包）
 - [ ] xls （通过[xlrd](https://xlrd.readthedocs.io/en/latest/)包）
 
 ## Credits & References
