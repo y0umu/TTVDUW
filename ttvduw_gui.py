@@ -1,6 +1,7 @@
 '''
 Graphical user interface for ttvduw
 '''
+from tabnanny import verbose
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -11,6 +12,8 @@ from openpyxl.utils.exceptions import InvalidFileException
 
 from ttvduw import DocuPrinter
 from ttvduw_utils import select_datafeeder
+
+# from ttvduw_dbg import total_size
 
 class TtvduwGui(tk.Tk):
     tpl_filetypes = (
@@ -295,6 +298,8 @@ class TtvduwGui(tk.Tk):
             self._enable_all_buttons()
             # 复位“生成”按钮的标识
             self.txt_generate.set('生成我想要的文档！')
+        # why consumes so much memory?
+        # print(total_size(globals(), verbose=True))
 
     def _build_data_feeder(self):
         '''
