@@ -53,3 +53,30 @@ def test_all_base():
 def test_gui():
     ttvduw_app = TtvduwGui()
     ttvduw_app.mainloop()
+
+def test_mem_stress(loops=1):
+    '''
+    This test function simulates what is described in 
+    https://github.com/y0umu/TTVDUW/issues/1
+    '''
+    from ttvduw_dbg import total_size
+    import pdb
+    import gc
+
+    # gc.set_debug(gc.DEBUG_LEAK)
+    tpl_name = 'examples/成绩排名证明/成绩排名证明（推免）模板_tpl.docx'
+    i = 0
+    while i < loops:
+        docu_printer = DocuPrinter(tpl_name)
+        df = CsvDataFeeder('examples/成绩排名证明/2022级智能建造学生成绩排名_datafeed.csv', 
+                        tab_start_from_row=2)
+        for c in df.context_feed():
+            docu_printer.set_context(c)
+            docu_printer.write(keys=('stu_id', 'stu_name'))
+        # print(f'bytes of docu_printer after iter {i} == {total_size(docu_printer)}')
+        # print(f'bytes of df after iter {i} == {total_size(df)}')
+        unreachable_cnts = gc.collect()
+        print(f'end of iter {i}, unreachable_cnts was {unreachable_cnts}')
+        # pdb.set_trace()
+        i += 1
+    

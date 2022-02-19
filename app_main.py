@@ -26,6 +26,11 @@ def test():
     #########
     # from test_ttvduw import test_gui
     # test_gui()
+
+    #########
+    # from test_ttvduw import test_mem_stress
+    # test_mem_stress(loops=50)
+
     pass
 
 def main():

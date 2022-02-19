@@ -6,6 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from tkinter import messagebox as msgbox
+import gc
 
 from docx.opc.exceptions import PackageNotFoundError
 from openpyxl.utils.exceptions import InvalidFileException
@@ -298,8 +299,8 @@ class TtvduwGui(tk.Tk):
             self._enable_all_buttons()
             # 复位“生成”按钮的标识
             self.txt_generate.set('生成我想要的文档！')
-        # why consumes so much memory?
-        # print(total_size(globals(), verbose=True))
+            # Force garbage collection. See test_ttvduw.test_mem_stress
+            gc.collect()
 
     def _build_data_feeder(self):
         '''
