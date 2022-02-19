@@ -17,7 +17,9 @@ class TtvduwGui(tk.Tk):
         ('Word 文档', '*.docx'),
     )
     df_filetypes = (
-        ('Excel 工作簿 / 逗号分隔值 (CSV) 文件', '*.xlsx *.csv'),
+        ('All supported formats', '*.xlsx *.csv'),
+        ('Excel 工作簿', '*.xlsx'),
+        ('逗号分隔值 (CSV) 文件', '*.csv')
     )
 
     def __init__(self):
