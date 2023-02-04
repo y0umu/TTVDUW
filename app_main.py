@@ -47,7 +47,7 @@ def main():
     parser.add_argument('-t', '--template', required=True, help='模板文件。docx格式')
     parser.add_argument('-f', '--data-feeder-file', required=True, help='键值数据表文件。目前支持xlsx, csv')
     parser.add_argument('-o', '--out-path', help='输出目录。如果不提供则根据 -t 指定的模板文件名生成')
-    parser.add_argument('-D', '--define-key-val', nargs='+', help='定义常数键值对。参数个数必须是2或2以上的偶数。')
+    parser.add_argument('-D', '--define-key-val', nargs='+', help='定义常数键值对。参数个数必须是2或2以上的偶数')
     parser.add_argument('--tab-start-from-row', type=int, default=1, help='键值数据表文件从第几行开始有数据(default: 1)')
     parser.add_argument('--tab-start-from-col', type=int, default=1, help='键值数据表文件从第几列开始有数据(default: 1)')
     parser.add_argument('--custom-out-names-with-keys', nargs='+', help='使用哪些键的值作为输出文件名')
