@@ -128,15 +128,18 @@ class DataFeeder():
         '''
         return self._keys
     
-    def context_feed(self):
+    def context_feed(self, const_key_val={}):
         '''
         这是一个生成器，喂给DocxTemplate.set_context()
+        @param const_key_val: dict。可选参数。用于补充常数键值映射。
         '''
         context = {}
         record_gen = self._record_gen()
         for r in record_gen:
             for k,v in zip(self._keys, r):
                 context[k] = v
+            if len(const_key_val) > 0:
+                context.update(const_key_val)
             yield context
 
 

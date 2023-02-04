@@ -69,6 +69,7 @@ Windows用户也可以直接[下载](https://github.com/y0umu/TTVDUW/releases/)�
 如下为命令行帮助。
 ```
 usage: app_main.py [-h] -t TEMPLATE -f DATA_FEEDER_FILE [-o OUT_PATH]
+                   [-D DEFINE_KEY_VAL [DEFINE_KEY_VAL ...]]
                    [--tab-start-from-row TAB_START_FROM_ROW]
                    [--tab-start-from-col TAB_START_FROM_COL]
                    [--custom-out-names-with-keys CUSTOM_OUT_NAMES_WITH_KEYS [CUSTOM_OUT_NAMES_WITH_KEYS ...]]
@@ -84,6 +85,8 @@ options:
                         键值数据表文件。目前支持xlsx, csv
   -o OUT_PATH, --out-path OUT_PATH
                         输出目录。如果不提供则根据 -t 指定的模板文件名生成
+  -D DEFINE_KEY_VAL [DEFINE_KEY_VAL ...], --define-key-val DEFINE_KEY_VAL [DEFINE_KEY_VAL ...]
+                        定义常数键值对。参数个数必须是2或2以上的偶数。
   --tab-start-from-row TAB_START_FROM_ROW
                         键值数据表文件从第几行开始有数据(default: 1)
   --tab-start-from-col TAB_START_FROM_COL
