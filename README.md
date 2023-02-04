@@ -104,8 +104,6 @@ python app_main.py -t "examples/成绩排名证明/成绩排名证明（推免�
 
 ## 构建Windows的二进制包
 ```powershell
-# 构建
-pip install -r requirements_with_pyinstaller.txt
 # 有些情况下需要“--path .”这个选项，否则会报import error
 pyinstaller --path . --name TTVDUW .\app_main.py
 # 运行构建的二进制包
