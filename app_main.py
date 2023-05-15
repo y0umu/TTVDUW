@@ -62,6 +62,7 @@ def main():
             tab_start_from_row=args.tab_start_from_row,
             tab_start_from_col=args.tab_start_from_col,
             ) as df:
+            additional_key_val = {}
             if args.define_key_val is not None:
                 additional_key_val = list2dict(args.define_key_val)
             for c in df.context_feed(const_key_val=additional_key_val):
