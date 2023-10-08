@@ -190,6 +190,13 @@ class XlsxDataFeeder(DataFeeder):
         '''
         wb = self._wb_xlsx
         ws = wb.active
+        # 部分软件生成的工作簿的 sheet1.xml 的 "dimension ref" 属性是错的
+        # 修正参考如下链接
+        # https://github.com/pandas-dev/pandas/issues/39001#issuecomment-762719332
+        # https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/worksheet/worksheet.html#Worksheet.calculate_dimension
+        # https://openpyxl.readthedocs.io/en/stable/optimized.html?highlight=reset_dimensions
+        if ws.calculate_dimension() == "A1:A1":
+            ws.reset_dimensions()
         ws_record_rows = ws.iter_rows(min_row=self.min_row, min_col=self.min_col)
         keys_row = next(ws_record_rows)  # 认为表格区的第1行是键名（字段名）
         return keys_row, ws_record_rows
