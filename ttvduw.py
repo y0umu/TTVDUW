@@ -195,8 +195,9 @@ class XlsxDataFeeder(DataFeeder):
         # https://github.com/pandas-dev/pandas/issues/39001#issuecomment-762719332
         # https://openpyxl.readthedocs.io/en/stable/_modules/openpyxl/worksheet/worksheet.html#Worksheet.calculate_dimension
         # https://openpyxl.readthedocs.io/en/stable/optimized.html?highlight=reset_dimensions
-        if ws.calculate_dimension() == "A1:A1":
-            ws.reset_dimensions()
+        # if ws.calculate_dimension() == "A1:A1":
+            # ws.reset_dimensions()
+        ws.reset_dimensions()    # 你永远不知道 sheet1.xml 的 "dimension ref" 会错成什么离谱模样，所以干脆全都reset
         ws_record_rows = ws.iter_rows(min_row=self.min_row, min_col=self.min_col)
         keys_row = next(ws_record_rows)  # 认为表格区的第1行是键名（字段名）
         return keys_row, ws_record_rows
