@@ -4,6 +4,7 @@ This is The Very Document yoU Want (ttvduw)
 from pathlib import Path
 import time
 import csv
+import xlrd
 from copy import deepcopy
 from docxtpl import DocxTemplate
 from openpyxl import load_workbook
@@ -274,3 +275,28 @@ class CsvDataFeeder(DataFeeder):
             # print(f"debug: r == {r}")
             # 表格区不是从第1列开始的
             yield r[(self.min_col-1):]
+
+class XlsDataFeeder(DataFeeder):
+    def __init__(self, fname: str, 
+                tab_start_from_row=1, tab_start_from_col=1):
+        pass
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, *args):
+        # TODO Implement cleanups for xlrd
+
+        print('debug: XlsDataFeeder cleanned')
+
+    def load_file(self):
+        '''
+        TODO 使用 xlrd 装载 xls 文件，并设置 self._keys
+        '''
+        pass
+
+    def _record_gen(self):
+        '''
+        TODO 产生一个含有数据源所有记录的生成器
+        '''
+        pass
