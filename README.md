@@ -19,7 +19,7 @@
 git clone https://github.com/y0umu/TTVDUW.git
 cd TTVDUW
 # 配置虚拟环境防止与用户的环境冲突
-python -m venv --prompt .venv
+python -m venv --prompt TTVDUW .venv
 # 激活这个环境 (powershell)
 .\.venv\Scripts\Activate.ps1   # .venv/bin/activate # 如果你用的是 bash
 # 安装用到的库
