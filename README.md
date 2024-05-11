@@ -14,16 +14,19 @@
 ~~你可以认为这个项目给python-docx-template写了（图形）用户界面~~
 
 ## 基本用法
-```shell
+```powershell
 # 配置环境
 git clone https://github.com/y0umu/TTVDUW.git
 cd TTVDUW
+# 配置虚拟环境防止与用户的环境冲突
+python -m venv --prompt .venv
+# 激活这个环境 (powershell)
+.\.venv\Scripts\Activate.ps1   # .venv/bin/activate # 如果你用的是 bash
+# 安装用到的库
 pip install -r requirements.txt
 # 运行
 python app_main.py
 ```
-目前的版本使用Python 3.10开发。
-
 这个app的入口是`app_main.py`，提供图形用户界面和命令行界面。如果不带任何命令行参数执行`app_main.py`，就会启动图形界面。
 
 Windows用户也可以直接[下载](https://github.com/y0umu/TTVDUW/releases/)使用Pyinstaller打包的二进制程序，而不必配置环境。在这种情况下，解压后，运行TTVDUW.exe即可看到用户界面。
