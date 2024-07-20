@@ -2,7 +2,7 @@
 Common utility functions share between modules
 '''
 from pathlib import PurePath
-from ttvduw import XlsxDataFeeder, CsvDataFeeder
+from ttvduw import XlsxDataFeeder, CsvDataFeeder, XlsDataFeeder
 
 # def get_fileext(fname: str):
 #     '''
@@ -20,6 +20,8 @@ def select_datafeeder(fname: str):
         DF = XlsxDataFeeder
     elif ext == 'csv':
         DF = CsvDataFeeder
+    elif ext == 'xls':
+        DF = XlsDataFeeder
     else:
         raise NotImplementedError(f'The type "{ext}" is not supported yet')
     return DF
