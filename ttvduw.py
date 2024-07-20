@@ -19,7 +19,7 @@ class DocuPrinter():
         out_path: 输出目录, str或None。如果不传入从str值则会将tpl_name的基名（PurePath.stem）作为输出目录的名称
         '''
         self.docu = DocxTemplate(tpl_name)
-        self._ori_docx = deepcopy(self.docu.docx)   # hack。让同一个DocxTemplate()能多次使用
+        # self._ori_docx = deepcopy(self.docu.docx)   # hack。让同一个DocxTemplate()能多次使用，docxtpl 0.15.0 之后版本不再需要
         self.context = {}  # 要填充的键值对，由self.set_context正确设置
         
         if out_path is None or len(out_path) == 0:
@@ -71,7 +71,8 @@ class DocuPrinter():
         out_name += '.docx'
         out_name = str(self.p_out_path / Path(out_name))
         docu.save(out_name)
-        self.docu.docx = deepcopy(self._ori_docx)   # 重置DocxTemplate().docx使这个模板能再次使用
+        # self.docu.docx = deepcopy(self._ori_docx)   # 重置DocxTemplate().docx使这个模板能再次使用，docxtpl 0.15.0 之后版本不再需要
+        docu.reset_replacements()    # 但需要这个，见 https://docxtpl.readthedocs.io/en/latest/#multiple-rendering
 
 
 class DataFeeder():
