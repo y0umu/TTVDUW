@@ -9,7 +9,7 @@
 
 ——问题是我想要批量生成的东西，系统里生成不了啊！！！例如什么成绩排名证明，还有什么在读证明，以及学生毕业设计的封面贴纸……
 
-网上好像没有现成的个人用户app可以达成“根据模板填空”这样的目的。好在已经有能达成类似目的的[python-docx-template](https://docxtpl.readthedocs.io/en/latest)了。
+网上好像没有现成的个人用户app可以达成“根据模板填空”这样的目的。（你说 Word 的邮件合并功能？那个有编程接口么？）好在已经有能达成类似目的的[python-docx-template](https://docxtpl.readthedocs.io/en/latest)了。
 
 ~~你可以认为这个项目给python-docx-template写了（图形）用户界面~~
 
