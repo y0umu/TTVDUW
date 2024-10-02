@@ -125,9 +125,9 @@ pyinstaller --path . --name TTVDUW .\app_main.py
 
 目前键值数据表只实现了xlsx的支持，后续还希望实现csv、xls支持。（看起来没多少事实际上界面各种逻辑估计涉及不少重写）
 - [x] csv （通过Python自带的csv包）
-- [ ] xls （通过[xlrd](https://xlrd.readthedocs.io/en/latest/)包）
+- [x] xls （通过[xlrd](https://xlrd.readthedocs.io/en/latest/)包）
 
-工作中还发现有些邀请函的内容因收信人不同，会产生不同的“类别”，是否有可能实现有条件地生成 (conditional generating)？
+- [ ] 工作中还发现有些邀请函的内容因收信人不同，会产生不同的“类别”，是否有可能实现有条件地生成 (conditional generating)？
 
 ## Credits & References
 开发工作还受到下面的资料的启发

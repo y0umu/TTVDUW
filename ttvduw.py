@@ -280,24 +280,42 @@ class CsvDataFeeder(DataFeeder):
 class XlsDataFeeder(DataFeeder):
     def __init__(self, fname: str, 
                 tab_start_from_row=1, tab_start_from_col=1):
-        pass
-    
+        super().__init__(fname, tab_start_from_row, tab_start_from_col)
+        self._xls_book = self.load_file()
+
     def __enter__(self):
         return self
     
     def __exit__(self, *args):
-        # TODO Implement cleanups for xlrd
-
+        self._xls_book.release_resources()
         print('debug: XlsDataFeeder cleanned')
 
     def load_file(self):
-        '''
-        TODO 使用 xlrd 装载 xls 文件，并设置 self._keys
-        '''
-        pass
+        xls_book = xlrd.open_workbook(self.fname)
+        self._xls_book = xls_book
+        sheet = xls_book.sheet_by_index(0)
+        self._sheet = sheet
+
+        keys_row = sheet.row(self.min_row - 1)
+        self._keys = [str(cell.value) for cell in keys_row[self.min_col - 1:]]
+        # self._record_rows = [sheet.row(i) for i in range(self.min_row, sheet.nrows)]
+        
+        return xls_book
 
     def _record_gen(self):
+        for i in range(self.min_row, self._sheet.nrows):
+            row = self._sheet.row(i)
+            yield [self._process_cell_value(cell) for cell in row[self.min_col - 1:]]
+    
+    def _process_cell_value(self, cell):
         '''
-        TODO 产生一个含有数据源所有记录的生成器
+        处理单元格的值，确保整数不被转换为浮点数
         '''
-        pass
+        v = cell.value
+        if cell.ctype == xlrd.XL_CELL_NUMBER:
+            if v.is_integer():
+                return str(int(v))
+            else:
+                return str(v)
+        else:
+            return str(v)

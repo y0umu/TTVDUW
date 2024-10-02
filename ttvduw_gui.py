@@ -21,8 +21,9 @@ class TtvduwGui(tk.Tk):
         ('Word 文档', '*.docx'),
     )
     df_filetypes = (
-        ('All supported formats', '*.xlsx *.csv'),
+        ('All supported formats', '*.xlsx *.xls *.csv'),
         ('Excel 工作簿', '*.xlsx'),
+        ('Excel 97-2003 工作簿', '*.xls'),
         ('逗号分隔值 (CSV) 文件', '*.csv')
     )
 
